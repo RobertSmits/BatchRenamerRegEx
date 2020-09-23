@@ -66,7 +66,7 @@ setup(
     entry_points="""
     [deluge.plugin.core]
     %s = %s:CorePlugin
-    [deluge.plugin.gtkui]
+    [deluge.plugin.gtk3ui]
     %s = %s:GtkUIPlugin
     [deluge.plugin.web]
     %s = %s:WebUIPlugin

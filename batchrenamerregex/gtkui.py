@@ -38,21 +38,19 @@
 #    statement from all source files in the program, then also delete it here.
 #
 
-import gtk
 import re
 import os
 
+from gi.repository import Gtk
+
 from deluge.log import LOG as log
-from deluge.log import setupLogger
 from deluge.ui.client import client
-from deluge.plugins.pluginbase import GtkPluginBase
+from deluge.plugins.pluginbase import Gtk3PluginBase
 import deluge.component as component
 import deluge.common
 from deluge.core.torrent import Torrent
 
-from common import get_resource
-setupLogger()
-
+from .common import get_resource
 
 class RenameFiles():
     """Class to wrap up the GUI and all filename processing functions"""
@@ -63,23 +61,23 @@ class RenameFiles():
 
     def run(self):
         """Build the GUI and display it."""
-        self.glade = gtk.glade.XML(get_resource("rename.glade"))
-        self.window = self.glade.get_widget("RenameDialog")
+        self.builder = Gtk.Builder.new_from_file(get_resource("rename.ui"))
+        self.window = self.builder.get_object("RenameDialog")
         self.window.set_transient_for(component.get("MainWindow").window)
-        self.find_field = self.glade.get_widget("find_field")
-        self.replace_field = self.glade.get_widget("replace_field")
-        self.ext_toggle = self.glade.get_widget("ext")
+        self.find_field = self.builder.get_object("find_field")
+        self.replace_field = self.builder.get_object("replace_field")
+        self.ext_toggle = self.builder.get_object("ext")
 
         dic = {
             "on_ok_clicked": self.ok,
             "on_cancel_clicked": self.cancel,
         }
 
-        self.glade.signal_autoconnect(dic)
+        self.builder.connect_signals(dic)
 
         self.build_tree_store()
         self.load_tree()
-        treeview = self.glade.get_widget("treeview")
+        treeview = self.builder.get_object("treeview")
         treeview.expand_all()
         self.window.show()
 
@@ -146,21 +144,21 @@ class RenameFiles():
 
     def build_tree_store(self):
         """Build the tree store to store data."""
-        tree_store = gtk.TreeStore(bool, str, str, str)
+        tree_store = Gtk.TreeStore(bool, str, str, str)
 
-        treeview = self.glade.get_widget("treeview")
+        treeview = self.builder.get_object("treeview")
         treeview.set_model(tree_store)
 
-        enable_column = gtk.TreeViewColumn('Rename')
-        index = gtk.TreeViewColumn('Index')
-        old_name = gtk.TreeViewColumn('Old Name')
-        new_name = gtk.TreeViewColumn('New Name')
+        enable_column = Gtk.TreeViewColumn('Rename')
+        index = Gtk.TreeViewColumn('Index')
+        old_name = Gtk.TreeViewColumn('Old Name')
+        new_name = Gtk.TreeViewColumn('New Name')
 
-        cell = gtk.CellRendererText()
+        cell = Gtk.CellRendererText()
         cell.set_property('editable', True)
         cell.connect('edited', self.edit_row)
 
-        bool_cell = gtk.CellRendererToggle()
+        bool_cell = Gtk.CellRendererToggle()
         bool_cell.set_property('activatable', True)
         bool_cell.connect('toggled', self.enable_row, tree_store)
 
@@ -214,7 +212,7 @@ class RenameFiles():
 
                         # if this, we're adding the actual files, no folders
                         if os.path.basename(p) == parts[i]:
-                            self.tree_store.append(parent, [False, index, parts[i], ''])
+                            self.tree_store.append(parent, [False, str(index), parts[i], ''])
                         # still adding folders -_-
                         else:
                             result = self.tree_store.append(parent, [False, "", parts[i], ''])
@@ -299,21 +297,21 @@ class RenameFiles():
         return new_files
 
 
-class GtkUI(GtkPluginBase):
+class GtkUI(Gtk3PluginBase):
     def enable(self):
-        self.glade = gtk.glade.XML(get_resource("config.glade"))
+        self.builder = Gtk.Builder.new_from_file(get_resource("config.ui"))
 
-        # component.get("Preferences").add_page("BatchRenamerRegEx", self.glade.get_widget("batch_prefs"))
-
+        # component.get("Preferences").add_page("BatchRenamerRegEx", self.builder.get_object("batch_prefs"))
+        
         # add the MenuItem to the context menu.
-        torrentmenu = component.get("MenuBar").torrentmenu
-        self.menu_item = gtk.ImageMenuItem("Rename Files")
-
-        img = gtk.image_new_from_stock(gtk.STOCK_CONVERT, gtk.ICON_SIZE_MENU)
+        img = Gtk.Image.new_from_icon_name(Gtk.STOCK_CONVERT, Gtk.IconSize.MENU)
+        self.menu_item = Gtk.ImageMenuItem(_("Rename Files"))
         self.menu_item.set_image(img)
         self.menu_item.connect("activate", self.rename_selected_torrent)
+        self.menu_item.show()
+
+        torrentmenu = component.get('MenuBar').torrentmenu
         torrentmenu.append(self.menu_item)
-        torrentmenu.show_all()
 
     def disable(self):
         # component.get("Preferences").remove_page("BatchRenamerRegEx")

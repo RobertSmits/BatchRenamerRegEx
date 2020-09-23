@@ -1,23 +1,23 @@
 <?xml version="1.0"?>
-<glade-interface>
+<interface>
   <!-- interface-requires gtk+ 2.6 -->
   <!-- interface-naming-policy toplevel-contextual -->
-  <widget class="GtkWindow" id="window1">
+  <object class="GtkWindow" id="window1">
     <child>
-      <widget class="GtkVBox" id="batch_prefs">
+      <object class="GtkVBox" id="batch_prefs">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <widget class="GtkLabel" id="label1">
+          <object class="GtkLabel" id="label1">
             <property name="visible">True</property>
             <property name="label" translatable="yes">&lt;b&gt;The Batch Renamer RegEx plugin has no preferences.&lt;/b&gt;</property>
             <property name="use_markup">True</property>
-          </widget>
+          </object>
           <packing>
             <property name="position">0</property>
           </packing>
         </child>
-      </widget>
+      </object>
     </child>
-  </widget>
-</glade-interface>
+  </object>
+</interface>
